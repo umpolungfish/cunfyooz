@@ -33,9 +33,9 @@
 
 <br>
 
-## 🎯 OVERVIEW
+## OVERVIEW
 
-**cunfyooz** is a metamorphic code engine designed to transform PE binaries into functionally equivalent but structurally unique variants.
+`cunfyooz` is a metamorphic code engine designed to transform PE binaries into (nearly) functionally equivalent but structurally unique variants.
 
 Metamorphic code changes its appearance with each generation while preserving its core functionality, making it resistant to signature-based detection and static analysis.
 
@@ -57,11 +57,11 @@ Metamorphic code changes its appearance with each generation while preserving it
 4. **TRANSFORMS** code through multiple obfuscation passes
 5. **REASSEMBLES** and reconstructs the modified PE binary
 
-The engine applies sophisticated transformations including NOP insertion, instruction substitution, register shuffling, control flow obfuscation, and optional virtualization.
+The `cunfyooz` engine applies sophisticated transformations including NOP insertion, instruction substitution, register shuffling, control flow obfuscation, and optional virtualization.
 
 <br>
 
-## 🚀 BUILDING AND USAGE
+## BUILDING AND USAGE
 
 ### PREREQUISITES
 
@@ -70,7 +70,7 @@ The engine applies sophisticated transformations including NOP insertion, instru
 - **Keystone** - Assembly framework
 - **GNU Make** - Build automation
 
-### 🔨 BUILDING
+### BUILDING
 
 **INSTALL CAPSTONE:**
 
@@ -100,7 +100,7 @@ make
 
 This will compile the source code and create the `cunfyooz` executable in the `bin` directory.
 
-### 📝 BASIC USAGE
+### BASIC USAGE
 
 **1. PREPARE YOUR PE BINARY**
 
@@ -118,7 +118,7 @@ The tool will generate a transformed binary named:
 cunfyoozed_target.exe
 ```
 
-### 🔧 CONFIGURATION
+### CONFIGURATION
 
 `cunfyooz` can be customized using a `config.json` file placed in the working directory:
 
@@ -182,7 +182,7 @@ cunfyoozed_target.exe
 
 <br>
 
-## ⚡ FEATURES
+## FEATURES
 
 <table>
 <tr>
@@ -190,28 +190,28 @@ cunfyoozed_target.exe
 
 ### CORE CAPABILITIES
 
-- ✅ **True random metamorphosis** using time-based entropy
-- 🔀 **Sophisticated NOP insertion** at safe locations
-- 🔄 **Functional instruction substitution** preserving semantics
-- 🎲 **Register shuffling** with dependency preservation
-- 🌐 **Control flow obfuscation** via opaque predicates
-- 📦 **Stack frame manipulation** for analysis resistance
-- 🔢 **Instruction reordering** within basic blocks
-- 🛡️ **Anti-debugging techniques** for runtime protection
-- 💾 **Optional virtualization** for maximum obfuscation
+- **TRUE RANDOM METAMORPHOSIS** using time-based entropy
+- **SOPHISTICATED NOP INSERTION** at safe locations
+- **FUNCTIONAL INSTRUCTION SUBSTITUTION** preserving semantics
+- **REGISTER SHUFFLING** with dependency preservation
+- **CONTROL FLOW OBFUSCATION** via opaque predicates
+- **STACK FRAME MANIPULATION** for analysis resistance
+- **INSTRUCTION REORDERING** within basic blocks
+- **ANTI-DEBUGGING TECHNIQUES** for runtime protection
+- **OPTIONAL VIRTUALIZATION** for maximum obfuscation
 
 </td>
 <td width="50%">
 
 ### TRANSFORMATION TECHNIQUES
 
-#### 🎯 BASIC TRANSFORMATIONS
+#### BASIC TRANSFORMATIONS
 - NOP insertion at safe points
 - Multi-byte NOP variations (XCHG, LEA, TEST)
 - Instruction substitution (LEA↔MOV, TEST↔CMP)
 - Register renaming with constraint satisfaction
 
-#### 🧩 ADVANCED TECHNIQUES
+#### ADVANCED TECHNIQUES
 - Opaque predicate insertion
 - Dead code injection
 - Stack manipulation sequences
@@ -224,7 +224,7 @@ cunfyoozed_target.exe
 
 <br>
 
-## 🗂️ MODULAR ARCHITECTURE
+## MODULAR ARCHITECTURE
 
 `cunfyooz` features a clean, layered architecture for binary transformation:
 
@@ -240,7 +240,7 @@ cunfyoozed_target.exe
 | **Assembler** | Reconstructs code using Keystone |
 | **PE Reconstructor** | Rebuilds transformed binary |
 
-### 🎨 TRANSFORMATION MODULES
+### TRANSFORMATION MODULES
 
 Specialized modules for different obfuscation techniques:
 
@@ -253,27 +253,27 @@ Specialized modules for different obfuscation techniques:
 - **Anti-Analysis Module** - Runtime detection and evasion
 - **Virtualization Engine** - Code-to-bytecode transformation
 
-### 🎨 ARCHITECTURE BENEFITS
+### ARCHITECTURE BENEFITS
 
 <table>
 <tr>
-<td>🔧 <b>Maintainability</b></td>
+<td><b>MAINTAINABILITY</b></td>
 <td>Modular design with clear separation</td>
 </tr>
 <tr>
-<td>📈 <b>Extensibility</b></td>
+<td><b>EXTENSIBILITY</b></td>
 <td>Easy addition of new transformations</td>
 </tr>
 <tr>
-<td>✅ <b>Reliability</b></td>
+<td><b>RELIABILITY</b></td>
 <td>Validation at each transformation stage</td>
 </tr>
 <tr>
-<td>🚀 <b>Performance</b></td>
+<td><b>PERFORMANCE</b></td>
 <td>Efficient multi-pass architecture</td>
 </tr>
 <tr>
-<td>🔒 <b>Safety</b></td>
+<td><b>SAFETY</b></td>
 <td>Dependency analysis prevents corruption</td>
 </tr>
 </table>
@@ -284,7 +284,7 @@ Specialized modules for different obfuscation techniques:
 
 `cunfyooz` employs a sophisticated 10-stage transformation pipeline:
 
-### STAGE 1: CONFIGURATION LOADING
+### STAGE 1 --> CONFIGURATION LOADING
 
 <details>
 <summary><b>Click to expand configuration details</b></summary>
@@ -296,7 +296,7 @@ Specialized modules for different obfuscation techniques:
 
 </details>
 
-### STAGE 2: PE PARSING
+### STAGE 2 --> PE PARSING
 
 <details>
 <summary><b>Click to expand PE parsing details</b></summary>
@@ -308,7 +308,7 @@ Specialized modules for different obfuscation techniques:
 
 </details>
 
-### STAGE 3: DISASSEMBLY
+### STAGE 3 --> DISASSEMBLY
 
 <details>
 <summary><b>Click to expand disassembly details</b></summary>
@@ -320,7 +320,7 @@ Specialized modules for different obfuscation techniques:
 
 </details>
 
-### STAGE 4: CONTROL FLOW ANALYSIS
+### STAGE 4 --> CONTROL FLOW ANALYSIS
 
 <details>
 <summary><b>Click to expand control flow details</b></summary>
@@ -332,7 +332,7 @@ Specialized modules for different obfuscation techniques:
 
 </details>
 
-### STAGE 5: DATA FLOW ANALYSIS
+### STAGE 5 --> DATA FLOW ANALYSIS
 
 <details>
 <summary><b>Click to expand data flow details</b></summary>
@@ -344,7 +344,7 @@ Specialized modules for different obfuscation techniques:
 
 </details>
 
-### STAGE 6: NOP INSERTION
+### STAGE 6 --> NOP INSERTION
 
 <details>
 <summary><b>Click to expand NOP insertion details</b></summary>
@@ -360,7 +360,7 @@ Specialized modules for different obfuscation techniques:
 
 </details>
 
-### STAGE 7: INSTRUCTION SUBSTITUTION
+### STAGE 7 --> INSTRUCTION SUBSTITUTION
 
 <details>
 <summary><b>Click to expand substitution details</b></summary>
@@ -374,7 +374,7 @@ Specialized modules for different obfuscation techniques:
 
 </details>
 
-### STAGE 8: REGISTER SHUFFLING
+### STAGE 8 --> REGISTER SHUFFLING
 
 <details>
 <summary><b>Click to expand register shuffling details</b></summary>
@@ -386,7 +386,7 @@ Specialized modules for different obfuscation techniques:
 
 </details>
 
-### STAGE 9: CONTROL FLOW OBFUSCATION
+### STAGE 9 --> CONTROL FLOW OBFUSCATION
 
 <details>
 <summary><b>Click to expand control flow obfuscation details</b></summary>
@@ -415,7 +415,7 @@ skip:
 
 </details>
 
-### STAGE 10: RECONSTRUCTION
+### STAGE 10 --> RECONSTRUCTION
 
 <details>
 <summary><b>Click to expand reconstruction details</b></summary>
@@ -430,9 +430,9 @@ skip:
 
 <br>
 
-## 📋 TRANSFORMATION EXAMPLES
+## TRANSFORMATION EXAMPLES
 
-### 🔹 NOP INSERTION
+### NOP INSERTION
 
 <details>
 <summary><b>Click to expand NOP examples</b></summary>
@@ -465,7 +465,7 @@ add rax, 5
 
 </details>
 
-### 🔹 INSTRUCTION SUBSTITUTION
+### INSTRUCTION SUBSTITUTION
 
 <details>
 <summary><b>Click to expand substitution examples</b></summary>
@@ -494,7 +494,7 @@ je label
 
 </details>
 
-### 🔹 REGISTER SHUFFLING
+### REGISTER SHUFFLING
 
 <details>
 <summary><b>Click to expand register shuffling examples</b></summary>
@@ -513,7 +513,7 @@ add rcx, rdx
 
 </details>
 
-### 🔹 CONTROL FLOW OBFUSCATION
+### CONTROL FLOW OBFUSCATION
 
 <details>
 <summary><b>Click to expand control flow examples</b></summary>
@@ -538,7 +538,7 @@ skip:
 
 </details>
 
-### 🔹 STACK FRAME OBFUSCATION
+### STACK FRAME OBFUSCATION
 
 <details>
 <summary><b>Click to expand stack frame examples</b></summary>
@@ -559,7 +559,7 @@ pop rax
 
 <br>
 
-## 🔬 CORE CONCEPTS
+## CORE CONCEPTS
 
 ### METAMORPHIC CODE
 
@@ -595,7 +595,7 @@ Metamorphic code transforms itself while maintaining functional equivalence. Key
 
 <br>
 
-## ⚠️ LIMITATIONS AND FUTURE DEVELOPMENT
+## LIMITATIONS AND FUTURE DEVELOPMENT
 
 `cunfyooz` is under active development with planned enhancements:
 
@@ -608,16 +608,16 @@ Metamorphic code transforms itself while maintaining functional equivalence. Key
 
 ### FUTURE ROADMAP
 
-- 🔄 ELF binary support for Linux executables
-- 📚 ARM architecture support
-- 🎯 Enhanced virtualization with custom VM
-- ⚡ Code compression to reduce size overhead
-- 🧪 Automated testing and validation framework
-- 🔐 Integration with packing techniques
+- ELF binary support for Linux executables
+- ARM architecture support
+- Enhanced virtualization with custom VM
+- Code compression to reduce size overhead
+- Automated testing and validation framework
+- Integration with packing techniques
 
 <br>
 
-## 🛡️ SECURITY CONSIDERATIONS
+## SECURITY CONSIDERATIONS
 
 ### ANTIVIRUS DETECTION
 
@@ -635,27 +635,17 @@ Always validate transformed binaries:
 - Verify input/output behavior
 - Check edge cases and error handling
 
-### RESPONSIBLE USE
-
-This tool is intended for:
-- Security research
-- Malware analysis education
-- Software protection research
-- Academic study of code transformation
-
-**Do not use for malicious purposes.**
-
 <br>
 
-## 🤝 CONTRIBUTING
+## CONTRIBUTING
 
 Contributions are welcome! Areas for contribution:
 
-- 🐛 Bug reports and fixes
-- 💡 New transformation techniques
-- 🔧 Architecture improvements
-- 📖 Documentation enhancements
-- 🧪 Test case development
+- Bug reports and fixes
+- New transformation techniques
+- Architecture improvements
+- Documentation enhancements
+- Test case development
 
 <br>
 
@@ -692,6 +682,6 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 <div align="center">
   <hr>
-  <p><i>May your binaries shift ceaselessly</i></p>
+  <p><i>let your binaries shift ceaselessly and sidewind in shadow</i></p>
   <p><b>cunfyooz</b> - metamorphic code engine for PE binaries</p>
 </div>
