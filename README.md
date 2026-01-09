@@ -39,6 +39,15 @@
 
 Metamorphic code changes its appearance with each generation while preserving its core functionality, making it resistant to signature-based detection and static analysis.
 
+### 🤖 AI-POWERED AGENT INTEGRATION
+
+The `cunfyooz` framework now includes integration with the Claude Agent Framework, enabling intelligent binary analysis and transformation through AI agents:
+
+- **Cunfyooz Agent**: Performs automated binary obfuscation and metamorphic transformations
+- **Analysis Agent**: Evaluates transformation effectiveness and binary properties
+- **Multi-Agent Swarms**: Parallel processing of multiple binaries
+- **Transformation Pipelines**: Sequential processing with context passing
+
 ### 🔄 THE PIPELINE
 
 ---
@@ -116,6 +125,38 @@ The tool will generate a transformed binary named:
 
 ```bash
 cunfyoozed_target.exe
+```
+
+### AI AGENT USAGE
+
+The cunfyooz framework includes AI agents for intelligent binary analysis and transformation:
+
+**1. SET UP ENVIRONMENT**
+
+```bash
+# Install Python dependencies
+pip install -r requirements.txt
+
+# Set Claude API key
+export ANTHROPIC_API_KEY="your-api-key-here"
+```
+
+**2. RUN SINGLE AGENT**
+
+```bash
+python examples/single_agent.py
+```
+
+**3. RUN MULTI-AGENT SWARM**
+
+```bash
+python examples/swarm.py
+```
+
+**4. RUN TRANSFORMATION PIPELINE**
+
+```bash
+python examples/pipeline.py
 ```
 
 ### CONFIGURATION
@@ -275,6 +316,44 @@ Specialized modules for different obfuscation techniques:
 <tr>
 <td><b>SAFETY</b></td>
 <td>Dependency analysis prevents corruption</td>
+</tr>
+</table>
+
+### AI AGENT ARCHITECTURE
+
+The cunfyooz framework includes an AI agent layer built on the Claude Agent Framework:
+
+| Component | Purpose |
+|-----------|---------|
+| **Cunfyooz Agent** | Performs binary obfuscation and metamorphic transformations |
+| **Analysis Agent** | Evaluates transformation effectiveness and binary properties |
+| **Agent Orchestrator** | Coordinates single, swarm, and pipeline execution |
+| **Binary Tools** | Specialized tools for binary analysis and transformation |
+| **Memory System** | Persists agent state and transformation history |
+| **Communication Layer** | Enables inter-agent collaboration |
+
+#### AGENT BENEFITS
+
+<table>
+<tr>
+<td><b>INTELLIGENCE</b></td>
+<td>AI-powered analysis and decision making</td>
+</tr>
+<tr>
+<td><b>AUTOMATION</b></td>
+<td>Automated transformation workflows</td>
+</tr>
+<tr>
+<td><b>ADAPTABILITY</b></td>
+<td>Dynamic adjustment based on binary properties</td>
+</tr>
+<tr>
+<td><b>SCALABILITY</b></td>
+<td>Parallel processing with swarm capabilities</td>
+</tr>
+<tr>
+<td><b>INSIGHT</b></td>
+<td>Detailed analysis and reporting</td>
 </tr>
 </table>
 
