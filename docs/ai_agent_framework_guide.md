@@ -20,7 +20,7 @@ The Cunfyooz AI Agent Framework combines the power of the Claude AI API with the
 - **AI-Powered Decision Making**: Agents intelligently determine optimal obfuscation strategies based on binary analysis
 - **Multi-Agent Coordination**: Support for single agents, swarms, and sequential pipelines
 - **Binary Analysis**: Comprehensive analysis of binary properties, entropy, and structural characteristics
-- **Transformation Validation**: Automatic validation to ensure transformed binaries maintain original functionality
+- **Transformation Validation**: Automatic validation to ensure transformed binaries maintain original functionality (disabled by default for security - enables execution of binaries for comparison)
 - **Extensible Architecture**: Easy to add new agent types and transformation techniques
 
 ## Architecture
@@ -477,7 +477,7 @@ cunfyooz_config = {
         "log_transformations": True
     },
     "security": {
-        "validate_functionality": True,
+        "validate_functionality": False,  /* CHANGED FROM True TO False FOR SECURITY */
         "preserve_original_behavior": True
     }
 }

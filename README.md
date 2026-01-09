@@ -129,7 +129,7 @@ cunfyoozed_target.exe
 
 ### AI AGENT USAGE
 
-The cunfyooz framework includes AI agents for intelligent binary analysis and transformation:
+The cunfyooz framework includes AI agents for intelligent binary analysis and transformation. The unified CLI provides access to both the core transformation engine and the AI agent framework:
 
 **1. SET UP ENVIRONMENT**
 
@@ -141,23 +141,37 @@ pip install -r requirements.txt
 export ANTHROPIC_API_KEY="your-api-key-here"
 ```
 
-**2. RUN SINGLE AGENT**
+**2. RUN UNIFIED CLI**
+
+The unified CLI provides access to all cunfyooz capabilities:
 
 ```bash
-python examples/single_agent.py
+# Transform a binary using the core engine
+python cunfyooz_cli.py transform my_binary.exe
+
+# Analyze a binary with AI agents
+python cunfyooz_cli.py analyze my_binary.exe
+
+# Run complete analysis pipeline
+python cunfyooz_cli.py pipeline my_binary.exe
 ```
 
-**3. RUN MULTI-AGENT SWARM**
+**3. ADVANCED CLI USAGE**
+
+For detailed usage examples and advanced options, see the comprehensive documentation:
 
 ```bash
-python examples/swarm.py
+# View help
+python cunfyooz_cli.py --help
+
+# Transform with custom config
+python cunfyooz_cli.py transform my_binary.exe -c my_config.json
+
+# Analyze with specific task
+python cunfyooz_cli.py analyze my_binary.exe -t "identify potential vulnerabilities"
 ```
 
-**4. RUN TRANSFORMATION PIPELINE**
-
-```bash
-python examples/pipeline.py
-```
+For complete usage examples and documentation, see [docs/USAGE_EXAMPLES.md](docs/USAGE_EXAMPLES.md).
 
 ### CONFIGURATION
 
@@ -208,7 +222,7 @@ python examples/pipeline.py
     "log_transformations": true
   },
   "security": {
-    "validate_functionality": true,
+    "validate_functionality": false,  /* CHANGED FROM true TO false FOR SECURITY */
     "preserve_original_behavior": true
   }
 }
@@ -219,7 +233,7 @@ python examples/pipeline.py
 - `enabled` - Enable/disable specific transformations
 - `probability` - Percentage chance (1-100) for applying transformation
 - `verbose` - Output detailed transformation logs
-- `validate_functionality` - Verify transformed binary maintains original behavior
+- `validate_functionality` - Verify transformed binary maintains original behavior (DEFAULT: false for security - enables execution of binaries for comparison)
 
 <br>
 

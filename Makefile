@@ -10,7 +10,7 @@ TARGET = bin/cunfyooz
 SOURCES = $(wildcard $(SRCDIR)/*.c)
 OBJECTS = $(patsubst $(SRCDIR)/%.c, $(BUILDDIR)/%.o, $(SOURCES))
 
-.PHONY: all clean
+.PHONY: all clean install
 
 all: $(TARGET)
 
@@ -21,6 +21,12 @@ $(TARGET): $(OBJECTS)
 $(BUILDDIR)/%.o: $(SRCDIR)/%.c
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -c -o $@ $<
+
+install: all
+	@echo "Installing cunfyooz CLI..."
+	@chmod +x cunfyooz_cli.py
+	@mkdir -p bin
+	@cp cunfyooz_cli.py bin/cunfyooz-cli
 
 clean:
 	rm -rf $(BUILDDIR) bin

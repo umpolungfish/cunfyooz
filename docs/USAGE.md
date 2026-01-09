@@ -101,7 +101,7 @@ Create a `config.json` file in the working directory:
     "log_transformations": true
   },
   "security": {
-    "validate_functionality": true,
+    "validate_functionality": false,  /* CHANGED FROM true TO false FOR SECURITY */
     "preserve_original_behavior": true
   }
 }
@@ -118,7 +118,7 @@ Create a `config.json` file in the working directory:
 - `log_transformations`: When true, records all transformations applied
 
 #### Security Settings
-- `validate_functionality`: Perform validation checks to ensure functionality is preserved
+- `validate_functionality`: Perform validation checks to ensure functionality is preserved (DEFAULT: false for security - enables execution of binaries for comparison)
 - `preserve_original_behavior`: Attempt to maintain original program behavior as closely as possible
 
 ## Advanced Usage Examples

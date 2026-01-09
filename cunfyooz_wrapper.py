@@ -396,7 +396,7 @@ def example_usage():
                 "log_transformations": True
             },
             "security": {
-                "validate_functionality": True,
+                "validate_functionality": False,  # Changed from True to False for security
                 "preserve_original_behavior": True
             }
         }

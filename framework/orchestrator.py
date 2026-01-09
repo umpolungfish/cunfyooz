@@ -132,6 +132,12 @@ class AgentOrchestrator:
 
                     if result.get("status") == "success":
                         successful += 1
+
+                        # If the result contains context, merge it with the global context
+                        if "context" in result:
+                            if context is None:
+                                context = {}
+                            context.update(result["context"])
                     else:
                         failed += 1
 

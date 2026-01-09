@@ -8,6 +8,8 @@ from enum import Enum
 import os
 import anthropic
 from datetime import datetime
+import json
+from pathlib import Path
 
 
 class AgentStatus(Enum):
@@ -151,20 +153,68 @@ class BaseAgent(ABC):
         self.end_time = datetime.now()
         self.results = {"error": error}
 
-    def save_artifact(self, artifact_data: Any, artifact_type: str) -> None:
+    def save_artifact(self, artifact_data: Any, artifact_type: str, save_to_file: bool = True) -> str:
         """
         Save an artifact produced by this agent.
 
         Args:
             artifact_data: The artifact content
             artifact_type: Type/category of artifact
+            save_to_file: Whether to save the artifact to a file (default: True)
+
+        Returns:
+            Path to the saved file if saved, otherwise the artifact ID
         """
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+        artifact_id = f"{self.agent_id}_{artifact_type}_{timestamp}"
+
         artifact = {
+            "id": artifact_id,
             "type": artifact_type,
             "data": artifact_data,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
+            "agent_id": self.agent_id
         }
         self.artifacts.append(artifact)
+
+        if save_to_file:
+            # Create artifacts directory if it doesn't exist
+            artifacts_dir = Path("artifacts")
+            artifacts_dir.mkdir(exist_ok=True)
+
+            # Create agent-specific subdirectory
+            agent_artifacts_dir = artifacts_dir / self.agent_id
+            agent_artifacts_dir.mkdir(exist_ok=True)
+
+            # Generate filename with timestamp
+            if artifact_type == "analysis_report":
+                filename = f"{artifact_id}.txt"
+            elif artifact_type == "transformed_binary":
+                filename = f"{artifact_id}_transformed.bin"
+            else:
+                filename = f"{artifact_id}.json"
+
+            filepath = agent_artifacts_dir / filename
+
+            # Write the artifact data to file
+            if artifact_type == "analysis_report":
+                # For analysis reports, just write the text content
+                with open(filepath, 'w', encoding='utf-8') as f:
+                    f.write(str(artifact_data))
+            elif artifact_type == "transformed_binary":
+                # For transformed binaries, the data is the path to the binary
+                # So we don't need to write anything new, just record the path
+                with open(filepath, 'w', encoding='utf-8') as f:
+                    f.write(str(artifact_data))
+            else:
+                # For other types, save as JSON
+                with open(filepath, 'w', encoding='utf-8') as f:
+                    json.dump(artifact_data, f, indent=2, default=str)
+
+            artifact["file_path"] = str(filepath)
+            return str(filepath)
+
+        return artifact_id
 
     # Memory hooks (override to add persistence)
 

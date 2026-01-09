@@ -15,63 +15,16 @@
 
 // Function to validate that transformed executable behaves the same as original
 int validate_transformation(const char* original_file, const char* transformed_file) {
-    // For now, we'll implement a basic validation by running both and comparing output
-    // In a complete implementation, we'd want more sophisticated checks
-    
-    char original_cmd[512], transformed_cmd[512];
-    char original_output[256], transformed_output[256];
-    
-    // Run original executable and capture output
-    snprintf(original_cmd, sizeof(original_cmd), "wine %s 2>/dev/null", original_file);
-    FILE* orig_fp = popen(original_cmd, "r");
-    if (!orig_fp) {
-        fprintf(stderr, "Failed to run original executable for validation\n");
-        return -1;
-    }
-    
-    if (fgets(original_output, sizeof(original_output), orig_fp) == NULL) {
-        // Handle case where no output is generated
-        original_output[0] = '\0';
-    }
-    pclose(orig_fp);
-    
-    // Run transformed executable and capture output
-    snprintf(transformed_cmd, sizeof(transformed_cmd), "wine %s 2>/dev/null", transformed_file);
-    FILE* trans_fp = popen(transformed_cmd, "r");
-    if (!trans_fp) {
-        fprintf(stderr, "Failed to run transformed executable for validation\n");
-        return -1;
-    }
-    
-    if (fgets(transformed_output, sizeof(transformed_output), trans_fp) == NULL) {
-        // Handle case where no output is generated
-        transformed_output[0] = '\0';
-    }
-    pclose(trans_fp);
-    
-    // Compare outputs, handling potential line ending differences
-    size_t orig_len = strlen(original_output);
-    size_t trans_len = strlen(transformed_output);
-    
-    // Remove potential \r\n or \n at the end of both strings
-    if (orig_len > 0 && original_output[orig_len - 1] == '\n') {
-        original_output[orig_len - 1] = '\0';
-        orig_len--;
-        if (orig_len > 0 && original_output[orig_len - 1] == '\r') {
-            original_output[orig_len - 1] = '\0';
-        }
-    }
-    
-    if (trans_len > 0 && transformed_output[trans_len - 1] == '\n') {
-        transformed_output[trans_len - 1] = '\0';
-        trans_len--;
-        if (trans_len > 0 && transformed_output[trans_len - 1] == '\r') {
-            transformed_output[trans_len - 1] = '\0';
-        }
-    }
-    
-    // If outputs match, transformation is valid
-    return strcmp(original_output, transformed_output) == 0 ? 1 : 0;
+    // SECURITY UPDATE: This function is now disabled by default to prevent execution of potentially malicious binaries
+    // Previous implementation ran both executables and compared outputs using wine and popen
+    // This posed a security risk when processing untrusted binaries
+
+    fprintf(stderr, "Functionality validation is disabled by default for security reasons.\n");
+    fprintf(stderr, "Validation requires executing both original and transformed binaries for comparison.\n");
+    fprintf(stderr, "This is disabled to prevent execution of potentially malicious code.\n");
+
+    // Return -1 to indicate validation is skipped due to security concerns
+    return -1; // Indicate that validation was not performed for security reasons
 }
 
 int main(int argc, char *argv[]) {
@@ -107,9 +60,9 @@ int main(int argc, char *argv[]) {
             config->transformations.instruction_reordering.enabled = true;
             config->transformations.anti_analysis_techniques.enabled = true;
             config->transformations.virtualization_engine.enabled = false; // Disabled by default
-            
-            // Set default security settings
-            config->security.validate_functionality = true;
+
+            // Set default security settings - DISABLE EXECUTION BY DEFAULT FOR SECURITY
+            config->security.validate_functionality = false;  // Changed from true to false
             config->security.preserve_original_behavior = true;
         }
     }
@@ -312,15 +265,16 @@ int main(int argc, char *argv[]) {
     if (config && config->security.validate_functionality) {
         printf("Validating transformed executable functionality...\n");
         int validation_result = validate_transformation(filepath, output_filename);
-        
+
         if (validation_result == -1) {
-            fprintf(stderr, "Validation failed: Could not run executables for comparison\n");
+            // Validation was skipped for security reasons (execution disabled)
+            printf("Validation skipped: Execution disabled for security (would execute binaries for comparison)\n");
         } else if (validation_result == 0) {
             fprintf(stderr, "Validation failed: Transformed executable produces different output than original\n");
-            
+
             // Remove the invalid transformed file
             remove(output_filename);
-            
+
             // Clean up resources
             free(reassembled_code);
             free_instruction_list(transformed_instructions);
