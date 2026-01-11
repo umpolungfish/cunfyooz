@@ -1,5 +1,6 @@
 #include "transformer.h"
 #include "assembler.h" // New include
+#include "relocation.h" // Relocation tracking
 #include <stdlib.h>
 #include <string.h>
 #include <capstone/capstone.h>
@@ -7,6 +8,44 @@
 #include <inttypes.h>
 #include <ctype.h> // For isdigit
 #include <time.h>  // For randomization
+
+// Maximum bytes for x86-64 instructions - increase from default 16 to handle all cases
+#define MAX_INSN_BYTES 24  // Some x86-64 instructions with prefixes can exceed 16 bytes
+
+// Helper function to safely assemble and copy instruction bytes
+// Returns 1 on success, 0 on failure
+static int safe_assemble_instruction(cs_insn* target_insn, const char* asm_str, uint64_t address, x86_insn id) {
+    size_t asm_size;
+    unsigned char* asm_bytes = assemble_instruction(asm_str, address, &asm_size);
+
+    if (!asm_bytes) {
+        fprintf(stderr, "Warning: Failed to assemble: %s\n", asm_str);
+        return 0;
+    }
+
+    // Check if assembled instruction fits in cs_insn.bytes[]
+    if (asm_size > sizeof(target_insn->bytes)) {
+        fprintf(stderr, "Warning: Assembled instruction too large (%zu bytes): %s\n", asm_size, asm_str);
+        fprintf(stderr, "         Maximum size is %zu bytes. Skipping this transformation.\n", sizeof(target_insn->bytes));
+        free(asm_bytes);
+        return 0;
+    }
+
+    // Check for zero-size assembly (invalid result)
+    if (asm_size == 0) {
+        fprintf(stderr, "Warning: Assembled instruction has zero size: %s\n", asm_str);
+        free(asm_bytes);
+        return 0;
+    }
+
+    // Copy the assembled bytes and set size
+    memcpy(target_insn->bytes, asm_bytes, asm_size);
+    target_insn->size = asm_size;
+    target_insn->id = id;
+    free(asm_bytes);
+
+    return 1;
+}
 
 // Control Flow Analysis Data Structures
 typedef struct basic_block {
@@ -95,29 +134,17 @@ instruction_list* apply_nop_insertion(const instruction_list* original_instructi
             // Insert standard NOP instruction
             cs_insn* nop_insn = &new_list->instructions[new_idx];
             memset(nop_insn, 0, sizeof(cs_insn));
-            
-            size_t nop_size;
-            unsigned char* nop_bytes = assemble_instruction("nop", 0, &nop_size);
-            if (nop_bytes) {
-                nop_insn->id = X86_INS_NOP;
-                nop_insn->size = nop_size <= sizeof(nop_insn->bytes) ? nop_size : 0;
-                if (nop_insn->size > 0) {
-                    memcpy(nop_insn->bytes, nop_bytes, nop_size);
-                }
-                free(nop_bytes);
-            } else {
-                // Fallback: manual NOP creation
-                nop_insn->id = X86_INS_NOP;
-                nop_insn->size = 1;
-                nop_insn->bytes[0] = 0x90; // Standard NOP opcode
+
+            // Use safe assembly function
+            uint64_t nop_addr = original_instructions->instructions[i].address + original_instructions->instructions[i].size;
+            if (safe_assemble_instruction(nop_insn, "nop", nop_addr, X86_INS_NOP)) {
+                strcpy(nop_insn->mnemonic, "nop");
+                nop_insn->op_str[0] = '\0';
+                nop_insn->address = nop_addr;
+                nop_insn->detail = NULL;
+                new_idx++; // Successfully added NOP
             }
-            
-            strcpy(nop_insn->mnemonic, "nop");
-            nop_insn->op_str[0] = '\0';
-            nop_insn->address = original_instructions->instructions[i].address + original_instructions->instructions[i].size;
-            nop_insn->detail = NULL;
-            
-            new_idx++; // Increment since we added a NOP
+            // If safe_assemble_instruction fails, we skip this NOP insertion
         }
     }
     
@@ -171,29 +198,22 @@ instruction_list* apply_register_shuffling(const instruction_list* original_inst
                         // Alternative: MOV R1, R2 -> LEA R1, [R2] (only if we're sure it's safe)
                         // This is safe as LEA R1, [R2] is equivalent to MOV R1, R2 when no displacement
                         char lea_str[128];
-                        snprintf(lea_str, sizeof(lea_str), "lea %s, [%s]", 
-                                cs_reg_name(handle, op0->reg), 
+                        snprintf(lea_str, sizeof(lea_str), "lea %s, [%s]",
+                                cs_reg_name(handle, op0->reg),
                                 cs_reg_name(handle, op1->reg));
 
-                        size_t lea_size;
-                        unsigned char* lea_bytes = assemble_instruction(lea_str, 0, &lea_size);
-                        if (lea_bytes) {
-                            cs_insn* lea_insn = &new_list->instructions[new_idx++];
-                            memset(lea_insn, 0, sizeof(cs_insn));
-                            lea_insn->id = X86_INS_LEA;
-                            lea_insn->size = lea_size <= sizeof(lea_insn->bytes) ? lea_size : 0;
-                            if (lea_insn->size > 0) {
-                                memcpy(lea_insn->bytes, lea_bytes, lea_insn->size);
-                            }
-                            free(lea_bytes);
+                        cs_insn* lea_insn = &new_list->instructions[new_idx];
+                        memset(lea_insn, 0, sizeof(cs_insn));
 
+                        if (safe_assemble_instruction(lea_insn, lea_str, original_insn->address, X86_INS_LEA)) {
                             strcpy(lea_insn->mnemonic, "lea");
-                            snprintf(lea_insn->op_str, sizeof(lea_insn->op_str), "%s, [%s]", 
-                                    cs_reg_name(handle, op0->reg), 
+                            snprintf(lea_insn->op_str, sizeof(lea_insn->op_str), "%s, [%s]",
+                                    cs_reg_name(handle, op0->reg),
                                     cs_reg_name(handle, op1->reg));
                             lea_insn->address = original_insn->address;
                             lea_insn->detail = NULL;
-                            
+
+                            new_idx++;  // Successfully added LEA
                             processed = true; // Mark as processed to skip original instruction
                         }
                     }
@@ -280,31 +300,25 @@ instruction_list* apply_instruction_substitution(const instruction_list* origina
 
             // Convert MOV reg, 0 to XOR reg, reg (70% chance to be more aggressive)
             if (op0->type == X86_OP_REG && op1->type == X86_OP_IMM && op1->imm == 0) {
-                if (rand() % 100 < 70) { 
+                if (rand() % 100 < 70) {
                     // Create XOR reg, reg instruction
                     char xor_instr[128];
-                    snprintf(xor_instr, sizeof(xor_instr), "xor %s, %s", 
-                             cs_reg_name(handle, op0->reg), 
+                    snprintf(xor_instr, sizeof(xor_instr), "xor %s, %s",
+                             cs_reg_name(handle, op0->reg),
                              cs_reg_name(handle, op0->reg));
 
-                    size_t xor_size;
-                    unsigned char* xor_bytes = assemble_instruction(xor_instr, 0, &xor_size);
-                    if (xor_bytes) {
-                        cs_insn* xor_insn = &new_list->instructions[new_idx++];
-                        memset(xor_insn, 0, sizeof(cs_insn));
-                        xor_insn->id = X86_INS_XOR;
-                        xor_insn->size = xor_size <= sizeof(xor_insn->bytes) ? xor_size : 0;
-                        if (xor_insn->size > 0) {
-                            memcpy(xor_insn->bytes, xor_bytes, xor_insn->size);
-                        }
-                        free(xor_bytes);
+                    cs_insn* xor_insn = &new_list->instructions[new_idx];
+                    memset(xor_insn, 0, sizeof(cs_insn));
 
+                    if (safe_assemble_instruction(xor_insn, xor_instr, insn->address, X86_INS_XOR)) {
                         strcpy(xor_insn->mnemonic, "xor");
-                        snprintf(xor_insn->op_str, sizeof(xor_insn->op_str), "%s, %s", 
-                                 cs_reg_name(handle, op0->reg), 
+                        snprintf(xor_insn->op_str, sizeof(xor_insn->op_str), "%s, %s",
+                                 cs_reg_name(handle, op0->reg),
                                  cs_reg_name(handle, op0->reg));
                         xor_insn->address = insn->address;
                         xor_insn->detail = NULL;
+
+                        new_idx++;
                         substituted = true;
                     }
                 }
@@ -702,13 +716,15 @@ instruction_list* apply_control_flow_obfuscation(const instruction_list* origina
 }
 
 // Helper function to recalculate instruction addresses after transformations
+// NOTE: This is a simplified version that only updates addresses, not jump targets
+// For full jump target relocation, use recalculate_addresses_with_map from relocation.h
 void recalculate_addresses(instruction_list* instructions) {
     if (!instructions || !instructions->instructions) {
         return;
     }
-    
+
     uint64_t current_address = instructions->instructions[0].address; // Start with first instruction's address
-    
+
     for (size_t i = 0; i < instructions->count; i++) {
         // Set current instruction to the calculated address
         instructions->instructions[i].address = current_address;

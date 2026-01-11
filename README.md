@@ -26,6 +26,7 @@
   <a href="#architecture">Architecture</a> •
   <a href="#transformation-pipeline">Pipeline</a> •
   <a href="#examples">Examples</a> •
+  <a href="#code-quality--documentation">Documentation</a> •
   <a href="#contributing">Contributing</a>
 </p>
 
@@ -692,6 +693,15 @@ Metamorphic code transforms itself while maintaining functional equivalence. Key
 
 `cunfyooz` is under active development with planned enhancements:
 
+### RECENT FIXES (2026-01-11)
+
+The following critical issues have been **RESOLVED**:
+- ✓ **Jump/Call Target Corruption** - Relocation tracking system now updates all control flow targets
+- ✓ **Instruction Size Overflow** - Safe assembly with overflow protection implemented
+- ✓ **PE Structure Corruption** - DataDirectory and section VAs properly updated
+
+See [CORRUPTION_FIXES.md](CORRUPTION_FIXES.md) for technical details.
+
 ### CURRENT LIMITATIONS
 
 - **PE Format Only** - Currently supports Windows PE binaries exclusively
@@ -730,6 +740,45 @@ Always validate transformed binaries:
 
 <br>
 
+## CODE QUALITY & DOCUMENTATION
+
+### Developer Documentation
+
+For developers working with this codebase:
+
+- **[CLAUDE.md](CLAUDE.md)** - Comprehensive guide for AI-assisted development with Claude Code. Contains architecture details, build commands, common workflows, and implementation notes.
+
+- **[CORRUPTION_FIXES.md](CORRUPTION_FIXES.md)** - Technical documentation of critical binary corruption fixes. Details the relocation tracking system, instruction size handling, and PE structure updates.
+
+- **[BUGFIXES.md](BUGFIXES.md)** - Detailed record of identified issues and their resolutions. Useful for understanding code quality standards and debugging patterns.
+
+### Code Quality Standards
+
+The `cunfyooz` codebase maintains high quality standards:
+
+- ✓ **Zero compiler warnings** - Compiles cleanly with `-Wall -Wextra`
+- ✓ **Consistent code style** - C and Python code follow consistent conventions
+- ✓ **Memory safety** - Proper initialization and error handling throughout
+- ✓ **Security-first** - Binary execution disabled by default to prevent malicious code execution
+- ✓ **Type safety** - Explicit None checks and proper variable initialization in Python
+
+### Recent Improvements
+
+**2026-01-11 - Critical Binary Corruption Fixes:**
+- ✓ **Fixed Jump/Call Target Corruption** - Implemented comprehensive relocation tracking system to update jump/call targets after transformations
+- ✓ **Fixed Instruction Size Overflow** - Added safe assembly helpers and buffer overflow protection
+- ✓ **Fixed PE DataDirectory RVA Corruption** - Properly update section VAs and DataDirectory entries when .text section changes size
+- See **[CORRUPTION_FIXES.md](CORRUPTION_FIXES.md)** for detailed technical analysis and implementation details
+
+**2026-01-10 - Code Quality Improvements:**
+- Fixed unused parameter warnings in C code
+- Corrected ELF binary file type detection
+- Standardized Python import patterns
+- Eliminated undefined variable bugs in agent framework
+- Added comprehensive developer documentation
+
+<br>
+
 ## CONTRIBUTING
 
 Contributions are welcome! Areas for contribution:
@@ -739,6 +788,8 @@ Contributions are welcome! Areas for contribution:
 - Architecture improvements
 - Documentation enhancements
 - Test case development
+
+Please review [CLAUDE.md](CLAUDE.md) for architectural details and [BUGFIXES.md](BUGFIXES.md) for code quality standards before contributing.
 
 <br>
 

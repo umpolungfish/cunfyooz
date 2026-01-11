@@ -9,6 +9,7 @@
 test_pe.exe
 test_pe.exe_*
 
+./.archive
 # Executables
 *.exe
 

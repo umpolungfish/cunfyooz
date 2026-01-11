@@ -185,7 +185,7 @@ Example `light_obfuscation.json`:
     },
     "anti_analysis_techniques": {
       "enabled": false,
-      "probability": 0
+      "probability": 10     
     },
     "virtualization_engine": {
       "enabled": false,

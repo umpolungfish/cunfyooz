@@ -223,13 +223,33 @@ int write_transformed_pe(const pe_info* original_pe, const unsigned char* new_co
     // Calculate aligned virtual size for the section
     uint32_t aligned_virtual_size = ((new_code_size + section_alignment - 1) / section_alignment) * section_alignment;
     
-    // Update section header fields
+    // Update section header fields for .text section
     new_section_header->Misc.VirtualSize = aligned_virtual_size;  // Virtual size (aligned)
     new_section_header->VirtualAddress = original_pe->sections[text_section_idx].virtual_address;  // Keep original VA
     new_section_header->SizeOfRawData = aligned_new_code_size;  // File size (aligned)
     new_section_header->PointerToRawData = text_section_file_offset;  // Keep original file offset
     // Preserve original section characteristics to maintain executable permissions
     new_section_header->Characteristics = original_pe->sections[text_section_idx].header.Characteristics;
+
+    // Update VAs of sections that come AFTER .text if .text changed size
+    int64_t text_size_delta = (int64_t)aligned_virtual_size - (int64_t)original_pe->sections[text_section_idx].header.Misc.VirtualSize;
+    if (text_size_delta != 0) {
+        printf("Updating VAs of sections after .text (delta: %ld bytes)\n", (long)text_size_delta);
+        for (int i = 0; i < original_pe->num_sections; i++) {
+            if (i == text_section_idx) continue; // Skip .text itself
+
+            IMAGE_SECTION_HEADER* section_hdr = (IMAGE_SECTION_HEADER*)(
+                new_file_buffer + section_header_offset + i * sizeof(IMAGE_SECTION_HEADER));
+
+            // If this section's VA comes after .text's VA, update it
+            if (original_pe->sections[i].virtual_address > original_pe->sections[text_section_idx].virtual_address) {
+                uint32_t old_va = section_hdr->VirtualAddress;
+                section_hdr->VirtualAddress = (uint32_t)(old_va + text_size_delta);
+                printf("  Section %d (%s): VA 0x%x -> 0x%x\n",
+                       i, original_pe->sections[i].name, old_va, section_hdr->VirtualAddress);
+            }
+        }
+    }
     
     // Update the NT headers
     IMAGE_NT_HEADERS64* new_nt_headers = (IMAGE_NT_HEADERS64*)(new_file_buffer + nt_headers_offset);
@@ -268,8 +288,8 @@ int write_transformed_pe(const pe_info* original_pe, const unsigned char* new_co
             // For the modified text section, use aligned virtual size
             section_virtual_end = original_pe->sections[i].virtual_address + aligned_virtual_size;
         } else {
-            // For other sections, use their original sizes
-            section_virtual_end = original_pe->sections[i].virtual_address + original_pe->sections[i].size;
+            // For other sections, use their VirtualSize from header (not SizeOfRawData)
+            section_virtual_end = original_pe->sections[i].virtual_address + original_pe->sections[i].header.Misc.VirtualSize;
         }
         
         if (section_virtual_end > max_virtual_end) {
@@ -285,10 +305,43 @@ int write_transformed_pe(const pe_info* original_pe, const unsigned char* new_co
     new_nt_headers->OptionalHeader.SizeOfHeaders = original_pe->nt_headers.OptionalHeader.SizeOfHeaders;
     new_nt_headers->OptionalHeader.NumberOfRvaAndSizes = original_pe->nt_headers.OptionalHeader.NumberOfRvaAndSizes;
     
-    // Copy DataDirectory entries - be careful since these contain RVAs that might need updating
-    // For now, preserve original entries since we're only changing .text section content, not structure
+    // Update DataDirectory entries to account for section size changes
+    // text_size_delta was already calculated above
+
+    printf("Text section size change: %ld bytes (%zu -> %u)\n",
+           (long)text_size_delta,
+           original_pe->sections[text_section_idx].size,
+           aligned_new_code_size);
+
+    // Get the .text section's virtual address range
+    uint32_t text_va_start = original_pe->sections[text_section_idx].virtual_address;
+    uint32_t text_va_end = text_va_start + aligned_virtual_size;
+
     for (uint32_t i = 0; i < original_pe->nt_headers.OptionalHeader.NumberOfRvaAndSizes; i++) {
-        new_nt_headers->OptionalHeader.DataDirectory[i] = original_pe->nt_headers.OptionalHeader.DataDirectory[i];
+        IMAGE_DATA_DIRECTORY* dir = &new_nt_headers->OptionalHeader.DataDirectory[i];
+        uint32_t original_rva = original_pe->nt_headers.OptionalHeader.DataDirectory[i].VirtualAddress;
+        uint32_t original_size = original_pe->nt_headers.OptionalHeader.DataDirectory[i].Size;
+
+        // Copy original values first
+        dir->VirtualAddress = original_rva;
+        dir->Size = original_size;
+
+        if (original_rva == 0 || original_size == 0) {
+            continue; // Empty entry, nothing to update
+        }
+
+        // If this RVA points AFTER the .text section, we need to adjust it
+        // But only if the .text section changed size
+        if (text_size_delta != 0 && original_rva > text_va_end) {
+            // This RVA points to a location after .text, so it needs adjustment
+            printf("Updating DataDirectory[%u] RVA: 0x%x -> 0x%x\n",
+                   i, original_rva, (uint32_t)(original_rva + text_size_delta));
+            dir->VirtualAddress = (uint32_t)(original_rva + text_size_delta);
+        }
+        // If the RVA points WITHIN the .text section, we generally shouldn't update it
+        // unless we've relocated specific structures, which we haven't in this case
+        // The exception would be if we're updating things like the export table which
+        // might be in .text, but that's unlikely for most binaries
     }
     
     // Write the modified PE file

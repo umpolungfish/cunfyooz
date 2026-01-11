@@ -42,26 +42,38 @@ unsigned char* reassemble_instructions(const instruction_list* instructions, siz
     if (!instructions || !total_size) {
         return NULL;
     }
-    
-    // Calculate the exact size needed based on the actual instruction sizes
+
+    // First pass: Calculate size with validation
     size_t calculated_size = 0;
+    size_t invalid_count = 0;
     for (size_t i = 0; i < instructions->count; i++) {
-        // Use the instruction's actual size as set during transformation
+        // Validate instruction size
+        if (instructions->instructions[i].size == 0) {
+            fprintf(stderr, "Warning: Instruction %zu has zero size (mnemonic: %s)\n",
+                    i, instructions->instructions[i].mnemonic);
+            invalid_count++;
+            // We'll try to reassemble it in the second pass
+        }
         calculated_size += instructions->instructions[i].size;
     }
-    
+
+    if (invalid_count > 0) {
+        fprintf(stderr, "Warning: Found %zu instructions with zero size. Will attempt to reassemble them.\n", invalid_count);
+    }
+
     if (calculated_size == 0) {
-        fprintf(stderr, "Warning: Calculated size is 0\n");
+        fprintf(stderr, "Error: Total calculated size is 0\n");
         return NULL;
     }
-    
-    // Allocate buffer for the reassembled binary
-    unsigned char* binary_buffer = (unsigned char*)malloc(calculated_size);
+
+    // Allocate buffer with extra space for reassembled instructions (may be larger)
+    size_t buffer_size = calculated_size * 2;  // 2x for safety
+    unsigned char* binary_buffer = (unsigned char*)malloc(buffer_size);
     if (!binary_buffer) {
-        fprintf(stderr, "Failed to allocate memory for binary buffer of size %zu\n", calculated_size);
+        fprintf(stderr, "Failed to allocate memory for binary buffer of size %zu\n", buffer_size);
         return NULL;
     }
-    
+
     size_t offset = 0;
     for (size_t i = 0; i < instructions->count; i++) {
         const cs_insn* insn = &instructions->instructions[i];
@@ -89,8 +101,10 @@ unsigned char* reassemble_instructions(const instruction_list* instructions, siz
             }
             
             // Check if copying would exceed buffer bounds
-            if (offset + real_insn_size > calculated_size) {
+            if (offset + real_insn_size > buffer_size) {
                 fprintf(stderr, "Error: Buffer overflow during reassembly at index %zu\n", i);
+                fprintf(stderr, "       Needed %zu bytes, buffer size is %zu bytes\n",
+                        offset + real_insn_size, buffer_size);
                 free(real_insn_bytes);
                 free(binary_buffer);
                 return NULL;
@@ -102,8 +116,10 @@ unsigned char* reassemble_instructions(const instruction_list* instructions, siz
             free(real_insn_bytes);
         } else {
             // Check if copying would exceed buffer bounds
-            if (offset + insn->size > calculated_size) {
+            if (offset + insn->size > buffer_size) {
                 fprintf(stderr, "Error: Buffer overflow detected during reassembly at index %zu\n", i);
+                fprintf(stderr, "       Needed %zu bytes, buffer size is %zu bytes\n",
+                        offset + insn->size, buffer_size);
                 free(binary_buffer);
                 return NULL;
             }

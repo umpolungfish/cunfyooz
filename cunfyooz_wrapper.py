@@ -191,14 +191,12 @@ class CunfyoozWrapper:
         # Determine file type
         with open(binary_path, 'rb') as f:
             magic = f.read(4)
-        
+
         file_type = "Unknown"
-        if magic.startswith(b'MZ'):  # PE file
+        if magic.startswith(b'\x7fELF'):  # ELF file (0x7f 'E' 'L' 'F')
+            file_type = "ELF (Executable and Linkable Format)"
+        elif magic.startswith(b'MZ'):  # PE file
             file_type = "PE (Portable Executable)"
-        elif magic.startswith(b'ELF'):  # ELF file
-            file_type = "ELF (Executable and Linkable Format)"
-        elif magic.startswith(b'\x7fELF'):  # ELF file (with 0x7f)
-            file_type = "ELF (Executable and Linkable Format)"
         elif len(magic) >= 2 and magic[:2] in [b'\x4d\x5a', b'\x5a\x4d']:  # MZ or ZM
             file_type = "PE (Portable Executable)"
         

@@ -214,7 +214,7 @@ If this is a transformation task, provide detailed instructions for the cunfyooz
         """Analyze binary to extract information for AI analysis"""
         try:
             # Use the wrapper to analyze the binary
-            from ..cunfyooz_wrapper import CunfyoozWrapper
+            from cunfyooz_wrapper import CunfyoozWrapper
             wrapper = CunfyoozWrapper()
 
             # Get binary analysis
@@ -413,6 +413,7 @@ class CunfyoozAnalysisAgent(BaseAgent):
             # Actually analyze the binaries using the wrapper to get real data
             original_analysis_data = None
             transformed_analysis_data = None
+            wrapper = None
 
             if original_binary and os.path.exists(original_binary):
                 from cunfyooz_wrapper import CunfyoozWrapper
@@ -421,12 +422,13 @@ class CunfyoozAnalysisAgent(BaseAgent):
 
             if transformed_binary and os.path.exists(transformed_binary):
                 from cunfyooz_wrapper import CunfyoozWrapper
-                wrapper = CunfyoozWrapper()
+                if wrapper is None:
+                    wrapper = CunfyoozWrapper()
                 transformed_analysis_data = wrapper.analyze_binary(transformed_binary)
 
             # If we have real analysis data, create a more detailed prompt with actual data
             if original_analysis_data and transformed_analysis_data:
-                comparison_data = wrapper.compare_binaries(original_binary, transformed_binary) if 'wrapper' in locals() else {}
+                comparison_data = wrapper.compare_binaries(original_binary, transformed_binary) if wrapper is not None else {}
 
                 detailed_content = f"""Based on the following binary transformation data, provide a detailed analysis:
 
@@ -534,7 +536,7 @@ Provide a detailed comparative analysis based on the actual binary files and the
         """Analyze binary to extract information for AI analysis"""
         try:
             # Use the wrapper to analyze the binary
-            from ..cunfyooz_wrapper import CunfyoozWrapper
+            from cunfyooz_wrapper import CunfyoozWrapper
             wrapper = CunfyoozWrapper()
 
             # Get binary analysis

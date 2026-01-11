@@ -10,6 +10,7 @@ import anthropic
 from datetime import datetime
 import json
 from pathlib import Path
+import shutil
 
 
 class AgentStatus(Enum):
@@ -203,9 +204,11 @@ class BaseAgent(ABC):
                     f.write(str(artifact_data))
             elif artifact_type == "transformed_binary":
                 # For transformed binaries, the data is the path to the binary
-                # So we don't need to write anything new, just record the path
-                with open(filepath, 'w', encoding='utf-8') as f:
-                    f.write(str(artifact_data))
+                # Copy the actual binary file instead of writing the path as text
+                if os.path.exists(artifact_data):
+                    shutil.copy2(artifact_data, filepath)
+                else:
+                    raise FileNotFoundError(f"Transformed binary not found: {artifact_data}")
             else:
                 # For other types, save as JSON
                 with open(filepath, 'w', encoding='utf-8') as f:
